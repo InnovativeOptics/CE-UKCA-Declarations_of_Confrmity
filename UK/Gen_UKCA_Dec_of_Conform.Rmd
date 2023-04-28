@@ -1,0 +1,80 @@
+---
+output: pdf_document
+params:
+  frame: NA
+  lens: NA
+geometry: margin=0.25in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F)
+unloadNamespace("kableExtra")
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
+```{r, echo = FALSE}
+prod_name <- paste0(params$frame, ".", params$lens)
+
+text_data <- readxl::read_excel("tech_data.xlsx")  %>% 
+  filter(Product == prod_name) %>% 
+  mutate_all(linebreak)
+
+Manufacturer_text <- tibble("UKCA Authorized Representative" = text_data$`UKCA Authorized Representative`) 
+model_no <- text_data$Product
+cert_no <- text_data$`UKCA Certificate Number`
+specs <- tibble("UKCA Specs" = text_data$`CE Specs`, "OD Specs" = text_data$`OD Specs`)
+```
+
+```{r, echo = F, fig.align='center'}
+knitr::include_graphics('top_im.JPG')
+```
+
+### UKCA Declaration of Conformity
+
+Innovative Optics declares the part listed below is in conformance with the provisions of the PPE Regulation “Personal Protective Equipment Regulations (Regulation (EU) 2016/425 as brought into UK law and amended)” and where such is the case, with the designated standard EN 207:2017.
+
+```{r, echo=FALSE}
+kable(t(c("Part number:",model_no)),
+      format = "latex",
+      escape = F, booktabs=T, col.names = NULL) %>% 
+  kable_styling(latex_options = c( "hold_position"))%>%
+  sub("\\\\toprule", "", .) %>%
+  sub("\\\\bottomrule", "", .) %>% 
+  row_spec(1:50, bold = TRUE)
+```
+
+#### Description of `r prod_name`
+
+This laser eye protection is intended for use in the medical and dental laser practices. They provide protection against specific laser radiation wavelengths (test results shown below). Why does one need to wear laser eye protection? The ‘light’ from medical and dental lasers can be concentrated and that light can cause permanent eye damage. It is possible to cause irreversible ocular injury with one direct or reflected laser beam. Laser light can be visible or invisible and its beam size can be as narrow as a human hair. 
+
+```{r, echo=FALSE}
+kable(text_data$Highlights,
+      format = "latex",
+      escape = F, booktabs=T, col.names = NULL) %>% 
+  kable_styling(latex_options = c( "hold_position"))%>%
+  sub("\\\\toprule", "", .) %>%
+  sub("\\\\bottomrule", "", .)
+```
+
+```{r, echo=FALSE}
+kable(specs,
+      format = "latex",
+      escape = F, booktabs=F) %>% 
+  kable_styling(latex_options = c( "hold_position"))%>%
+  sub("\\\\toprule", "", .) %>%
+  sub("\\\\bottomrule", "", .) %>% 
+  row_spec(0, bold = T)
+```
+
+#### This PPE is identical to the one which is subject to the UKCA-type-examination certificate number `r cert_no`
+
+```{r, echo = F, fig.align='center'}
+knitr::include_graphics('bot_im2.JPG')
+```
+
+`r kable(Manufacturer_text, format = "latex",escape = F, booktabs=T) %>% kable_styling(latex_options = c("hold_position")) %>%sub("\\\\toprule", "", .) %>%sub("\\\\bottomrule", "", .) %>% row_spec(0, bold = T)`
+
+#### Date of Report Generation - `r format(Sys.time(), '%B %d, %Y')`
