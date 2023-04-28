@@ -1,0 +1,76 @@
+---
+output: pdf_document
+params:
+  frame: NA
+  lens: NA
+  data: NA
+geometry: margin=0.25in
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning=F)
+unloadNamespace("kableExtra")
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
+```{r, echo = FALSE}
+prod_name <- paste0(params$frame, ".", params$lens)
+
+text_data <- readxl::read_excel("tech_data.xlsx") %>% 
+  filter(Product == prod_name) %>% 
+  mutate_all(linebreak)
+
+cert_no <- text_data$`CE Registration ID`
+specs <- tibble("CE Specs" = text_data$`CE Specs`, "OD Specs" = text_data$`OD Specs`)
+```
+
+```{r}
+knitr::include_graphics("top_im1.JPG")
+```
+
+## EU Declaration of Conformity
+
+Innovative Optics declares the part listed below is in conformance with the provisions of the PPE Regulation (EU) 2016/425, Directive 2001/95/EC and, where such is the case, with the harmonized/designated standard EN 207:2017.
+
+```{r, echo=FALSE}
+kable(t(c("Part number: ",text_data$Product)),
+      format = "latex",
+      escape = T, booktabs=T) %>% 
+  kable_styling(latex_options = c( "hold_position"))%>%
+  sub("\\\\toprule", "", .) %>%
+  sub("\\\\bottomrule", "", .) 
+```
+
+### Description of `r prod_name`
+
+This laser eye protection is intended for use in medical and dental laser practices. It provides protection against specific laser radiation wavelengths (shown below). Why does one need to wear laser eye protection? The ‘light’ from medical and dental lasers can be concentrated and that light can cause permanent eye damage. It is possible to cause irreversible ocular injury with one direct or reflected laser beam. Laser light can be visible or invisible and its energy can be concentrated to a small point. 
+
+```{r, echo=FALSE}
+kable(text_data$Highlights,
+      format = "latex",
+      escape = F, booktabs=T, col.names = NULL) %>%
+  kable_styling(latex_options = c( "hold_position"))%>%
+  sub("\\\\toprule", "", .) %>%
+  sub("\\\\bottomrule", "", .) 
+```
+
+```{r, echo=FALSE}
+kable(specs,
+      format = "latex",
+      escape = F, booktabs=T) %>%
+  kable_styling(latex_options = c( "hold_position"))%>%
+  sub("\\\\toprule", "", .) %>%
+  sub("\\\\bottomrule", "", .) %>%
+  row_spec(0, bold = T)
+```
+
+### This PPE is identical to the one which is subject to the EU-type-examination certificate number `r cert_no`
+
+```{r, echo = F, fig.align='center'}
+knitr::include_graphics('bot_im_sml.JPG')
+```
+
+#### Date Issued - `r format(Sys.time(), '%B %d, %Y')`
